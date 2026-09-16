@@ -1,0 +1,58 @@
+[
+ {
+  "slug": "01-perfect-is-fake",
+  "speaker": "Speaker name",
+  "layout_force": "screen",
+  "title": "Why over-polished AI faces read as fake",
+  "why_shareable": "Both scoring pools ranked this region top-3. Counter-intuitive core claim plus a concrete mechanism, and the screen shows the artifact being discussed.",
+  "segs": [
+   {
+    "a": 1243.7,
+    "b": 1250.9,
+    "title": "Real photos have flaws",
+    "why": "Strongest claim in the whole talk, placed at second 0 (retention rule). Ends on a complete sentence.",
+    "label": "real photos have flaws"
+   },
+   {
+    "a": 1288.3,
+    "b": 1311.5,
+    "title": "Lock every detail in a JSON template",
+    "why": "The mechanism behind the claim; the screen happens to show the template itself.",
+    "label": "lock every detail in JSON"
+   },
+   {
+    "a": 1329.4,
+    "b": 1348.8,
+    "title": "Free = average = fake",
+    "why": "Closing line, quotable on its own.",
+    "label": "free = average = fake"
+   }
+  ]
+ },
+ {
+  "slug": "02-camera-only-example",
+  "speaker": "Speaker name",
+  "layout_force": "camera",
+  "tempo": 1.06,
+  "title": "A clip shot on the webcam layout, slightly sped up",
+  "why_shareable": "Shows the non-screen-share path plus the optional tempo field.",
+  "segs": [
+   {
+    "a": 241.9,
+    "b": 279.2,
+    "title": "Opening claim",
+    "why": "Self-contained, no external referents, no dangling connective at the start.",
+    "label": "not what you think",
+    "motion": "in"
+   },
+   {
+    "a": 279.4,
+    "b": 291.3,
+    "title": "The number that makes it concrete",
+    "why": "Quotable figure; the follow-on detail sentence was cut to stay under 58s.",
+    "label": "the actual number",
+    "motion": "hold"
+   }
+  ]
+ }
+]

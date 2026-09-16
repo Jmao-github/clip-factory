@@ -1,0 +1,24 @@
+{
+  "_comment": "Per-session proper-noun table: misheard form -> correct form. Built in stage 0 from the event page, meeting notes and the speaker's own intro, then topped up by scanning the finished transcript. Applied to subtitles only — the audio is never touched. Longer keys must come first: replacement runs in insertion order over the word sequence, so 'GPT image 2.5' has to be listed before 'GPT image'.",
+
+  "CDance": "Seedance",
+  "cdance": "Seedance",
+  "C dance": "Seedance",
+  "sea dance": "Seedance",
+
+  "11 lab": "ElevenLabs",
+  "11 labs": "ElevenLabs",
+  "eleven labs": "ElevenLabs",
+
+  "buy plus": "BytePlus",
+  "byte plus": "BytePlus",
+
+  "GP image 2 .5": "GPT-Image 2.5",
+  "GP 2 .5": "GPT-Image 2.5",
+
+  "skew": "SKU",
+  "href": "Ahrefs",
+
+  "_note_on_the_spaces": "Whisper splits decimals into two tokens ('2' + '.5'), so a key written the way a human would type it will never match. overlay.py re-joins them before matching, but keep both spellings in the table when in doubt.",
+  "_note_on_risk": "Never add a mapping whose misheard form is also a normal English word unless it is wrong everywhere in this session — a blanket 'track' -> 'treg' will rewrite legitimate uses of 'track'. Fix those case by case instead."
+}

@@ -1,0 +1,42 @@
+# secrets — never commit a key
+.env
+.env.*
+!.env.example
+*.env.secrets
+
+# working artifacts
+*.mp4
+*.mov
+*.wav
+*.m4a
+*.mp3
+*.png
+*.jpg
+*.jpeg
+build/
+caps/
+vrev/
+jit/
+lw/
+whisper.json
+built.json
+retranscribe.json
+avcheck_out.json
+boundary_check.json
+splice_audit.json
+loudness.json
+layout_audit.json
+vision_gemini.json
+final_vision_review.json
+greenbox_result.txt
+sharpness.json
+facemap.json
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# os
+.DS_Store

@@ -1,0 +1,10 @@
+# Word-level transcription. mlx-whisper is Apple-Silicon only; on other hardware
+# use openai-whisper or faster-whisper instead and keep word_timestamps=True.
+mlx-whisper>=0.4 ; sys_platform == "darwin" and platform_machine == "arm64"
+
+numpy>=1.26
+pillow>=10.0
+
+# Not installable with pip — must be on PATH:
+#   ffmpeg, ffprobe   (brew install ffmpeg  /  apt install ffmpeg)
+# Node 18+ is only needed for the optional OpusClip scripts (scripts/opus_*.mjs).
