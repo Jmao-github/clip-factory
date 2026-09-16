@@ -1,6 +1,11 @@
 ---
 name: clip-factory
-description: 把长视频（workshop/播客/分享录制）加工成 45-58 秒、可直接发布的精华短片——完整流水线：取素材→词级转写→双模型内容评分选段→顺滑剪辑（删口头禅/压气口）→零推近高品质渲染→十二道机检验证闭环。当用户说「把这场 workshop 剪成短片 / 出几条 clip / 剪精华 / 给这条录制出宣传片」，或甩来一个录制文件 + 会议纪要链接要出片时触发。也覆盖 OpusClip 辅助（第二意见找高光）。质量铁律=源片像素不够就不放大（≤1.34×），一切阈值以 references/WORKFLOW.md 为真相源。发布动作永远等人点头。
+description: "Turn a long recording (workshop, podcast, conference talk) into 45-58s publish-ready clips: word-level transcription, dual-model segment scoring, filler-word removal with acoustic splice repair, zero-upscale rendering, burned-in captions, then twelve machine gates plus a release gate that refuse to promote a clip that failed anything. Use when the user asks to cut clips / shorts / highlights from a recording, repurpose a talk into social video, or hands over a recording file or meeting-notes link and wants clips out. 把长视频（workshop/播客/分享录制）加工成 45-58 秒、可直接发布的精华短片——完整流水线：取素材→词级转写→双模型内容评分选段→顺滑剪辑（删口头禅/压气口）→零推近高品质渲染→十二道机检验证闭环。当用户说「把这场 workshop 剪成短片 / 出几条 clip / 剪精华 / 给这条录制出宣传片」，或甩来一个录制文件 + 会议纪要链接要出片时触发。也覆盖 OpusClip 辅助（第二意见找高光）。质量铁律=源片像素不够就不放大（≤1.34×），一切阈值以 references/WORKFLOW.md 为真相源。发布动作永远等人点头。"
+license: MIT
+compatibility: "Requires ffmpeg/ffprobe on PATH, Python 3.10+ with numpy and pillow, a word-level transcriber (mlx-whisper on Apple Silicon), and a Gemini API key for the scoring and visual-review gates."
+metadata:
+  version: "8.0"
+  source: https://github.com/Jmao-github/clip-factory
 ---
 
 # clip-factory
