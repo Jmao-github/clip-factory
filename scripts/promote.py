@@ -2,7 +2,7 @@
 """发布门卫：逐条核对全部 gate 证据，全绿才把 {slug}.cand.mp4 替换成正式片 {slug}.mp4。
 旧有效成片在此之前绝不被触碰；任何缺证/失败/过期都指名 clip+gate（最窄重跑定位）。
 证据文件：built.json(词完整性) / retranscribe.json / avcheck_out.json / greenbox_result.txt / loudness.json(响度)
-/ final_vision_review.json(需 clips_pass 列表 = Gemini 意见 + 本人逐格人眼终裁)。
+/ final_vision_review.json(需 clips_pass 列表 = Gemini 意见 + 本人逐格人眼终裁) / filler_gate.json(G13)。
 新鲜度：所有证据 mtime 必须 ≥ cand 文件 mtime（防拿旧检查放行新片）。"""
 import json, os, sys
 os.chdir(os.environ.get('WORKDIR','.'))
@@ -16,6 +16,7 @@ av = load('avcheck_out.json') or []
 fv = (load('final_vision_review.json') or {}).get('clips_pass')
 ld = {r['slug']: r for r in load('loudness.json') or []}
 sa = {r['slug']: r for r in load('splice_audit.json') or []}
+fg = {r['slug']: r for r in load('filler_gate.json') or []}
 bc = {r['slug']: r for r in load('boundary_check.json') or []}
 gb = open('greenbox_result.txt').read().strip().splitlines()[-1] if os.path.exists('greenbox_result.txt') else ''
 
@@ -46,11 +47,12 @@ for c in json.load(open('built.json')):
     l = ld.get(slug)
     if not l: bad.append('缺 loudness.json → 跑 loudness_check.py')
     elif not l['ok']: bad.append(f"响度不达标 {l['lufs']} LUFS / TP {l['tp']}")
-    for nm, tbl, hint in (('splice_audit.json', sa, 'G12 残响'), ('boundary_check.json', bc, 'G11 边界词')):
+    for nm, tbl, hint in (('splice_audit.json', sa, 'G12 残响'), ('boundary_check.json', bc, 'G11 边界词'),
+                          ('filler_gate.json', fg, 'G13 口头禅（独立转写器）')):
         e = tbl.get(slug)
         if not e: bad.append(f'缺 {nm} → 跑对应机检')
         elif not e.get('ok'): bad.append(f'{hint} FAIL')
-    for p in ('retranscribe.json','avcheck_out.json','greenbox_result.txt','final_vision_review.json','loudness.json','boundary_check.json'):
+    for p in ('retranscribe.json','avcheck_out.json','greenbox_result.txt','final_vision_review.json','loudness.json','boundary_check.json','filler_gate.json'):
         if os.path.exists(p) and os.path.getmtime(p) < ct:
             bad.append(f'STALE: {p} 早于候选片，检查须在重建后重跑')
     # splice 审计的是 build 产物(base 的剪口)，在 overlay 前跑——新鲜度对 base 比(codex 原规则,0915实证不可省)

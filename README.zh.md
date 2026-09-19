@@ -4,7 +4,7 @@
 
 把一场 60 分钟的分享录制，做成几条 45–58 秒、**可以直接发出去**的短片；做不合格的那几条，它会拦下来不让你发。
 
-这不是一个"自动找高光"的工具。它是一条有主张的剪辑流水线，核心是**验证闭环**：渲染器和输出目录之间隔着 12 道机检 + 一道发布门。词被切了一半、剪口上残着一个 "uh"、响度飘了、字幕丢了一个音频里明明有的词——它会指名是哪条片的哪道 gate，然后这条片不予转正。
+这不是一个"自动找高光"的工具。它是一条有主张的剪辑流水线，核心是**验证闭环**：渲染器和输出目录之间隔着 13 道机检 + 一道发布门。词被切了一半、剪口上残着一个 "uh"、响度飘了、字幕丢了一个音频里明明有的词——它会指名是哪条片的哪道 gate，然后这条片不予转正。
 
 里面每一条规则，都是在真实素材上翻过车之后才写下来的。`references/` 里记着翻的是什么车、规则为什么长这样。
 
@@ -23,7 +23,7 @@
   ├─ 3 出片          词边界切点 → 顺滑层（删口头禅、压气口）→ 零推近机位
   │                  → 无损中间件 → 字幕 → 单代 crf16
   │
-  ├─ 4 验证闭环      12 道 gate（见下）。任何 FAIL 都指名 clip + gate，
+  ├─ 4 验证闭环      13 道 gate（见下）。任何 FAIL 都指名 clip + gate，
   │                  改完内容用 ONLY=<slug> 只重跑那一条，不推倒重来
   │
   └─ 5 promote       核证据 + 核新鲜度 → {slug}.cand.mp4 才变成 {slug}.mp4
@@ -40,7 +40,7 @@
 - **字幕对齐音频。** 音频里听得见的词，字幕上就得有；口头禅一个都不上字幕；多词品牌名在词序列上替换，换行也打不断。
 - **过期的检查一律不放行。** 发布门会拿每份证据文件的时间戳去比候选片的时间戳。
 
-## 12 道 gate
+## 13 道 gate
 
 | # | Gate | 它证明什么 | 证据 |
 |---|---|---|---|
@@ -56,6 +56,9 @@
 | 10 | 响度 | −16 ±1 LUFS，真峰值 ≤ −1.0 dBTP（EBU R128） | `loudness.json` |
 | 11 | 边界词 | 每个接口：上段末词在、下段首词在、±0.45 秒内无孤立口头禅 | `boundary_check.json` |
 | 12 | 拼接点残响 | 按波形查残响和粘连的 "uh"（转写对这个是聋的，必须测声学） | `splice_audit.json` |
+| 13 | 口头禅终检 | 成片交给**换一家厂商**的转写器复听，残留 uh/um 必须为 0 | `filler_gate.json` |
+
+第 13 道之所以存在，是因为第 2 道结构上查不出它自己的盲区：它拿同一个模型的转写去比同一个模型的重转写，模型从来不写的词永远能过。曾经有五条片过了全部 12 道 gate，其中两条各带着 10 个和 6 个能听见的口头禅。**一个工具不能验证它自己**——详见 [references/vendor-api-evaluation.md](references/vendor-api-evaluation.md)。
 
 第 9 道故意不做成全自动：模型毙稿官误报很多，人必须逐格裁完才准转正。
 
@@ -65,7 +68,8 @@
 - PATH 上有 `ffmpeg` / `ffprobe`
 - `pip install -r requirements.txt`（`mlx-whisper` 只支持 Apple Silicon；其他硬件换 `openai-whisper` 或 `faster-whisper`，保留 `word_timestamps=True` 即可）
 - 一个 Gemini API key（内容打分 + 视觉审查）：`GEMINI_API_KEY`
-- 可选：`OPENAI_API_KEY`（第二个打分池）、`OPUSCLIP_API_KEY`（第三方意见找高光）、`DESCRIPT_API_KEY`（多语言配音链）
+- `OPUSCLIP_API_KEY` **或** `DESCRIPT_API_KEY`：第 13 道 gate 与忠实转写源（为什么这不是可选项，见 `references/vendor-api-evaluation.md`）
+- 可选：`OPENAI_API_KEY`（第二个打分池）
 
 key 先读进程环境变量，再依次找 `$CLIP_FACTORY_ENV`、`./.env`、`~/.clip-factory.env`。把 `.env.example` 复制成 `.env` 填进去即可。**`.env` 已在 .gitignore 里——永远不要把 key 提交上去。**
 

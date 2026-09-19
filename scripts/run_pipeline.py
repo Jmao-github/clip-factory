@@ -41,6 +41,10 @@ gb = step('greenbox 绿框扫描', ['python3', 'greenbox_scan.py'], 'GREENBOX-CL
 Path('greenbox_result.txt').write_text(gb)
 step('loudness 响度', ['python3', 'loudness_check.py'], 'LOUDNESS-PASS')
 step('av 图文一致', ['python3', 'av_multi.py', 'built.json', 'avcheck_out.json'], 'SEGMENTS-PASS')
+if os.environ.get('FILLER_GATE', '1') != 'skip':
+    # G13：独立于 whisper 的转写器复听成片。G2 是 whisper 比 whisper，对口头禅结构上查不出来。
+    # 每条 ≈10 credits；确实不想花就显式 FILLER_GATE=skip，但那等于自愿放弃这道防线。
+    step('filler 口头禅终检（独立转写器）', ['python3', 'filler_gate.py'], 'FILLER-CLEAN')
 step('vision 成片视觉审查', ['python3', 'vision_review.py'])
 print('''
 ===== 机检全绿。剩两步是人的活 =====

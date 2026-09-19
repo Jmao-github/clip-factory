@@ -17,8 +17,13 @@ def norm(w): return re.sub(r"[^a-z0-9']", '', w.lower())
 def transcribe_window(f, t0, t1):
     subprocess.run(['ffmpeg','-v','error','-ss',str(max(t0,0)),'-to',str(t1),'-i',f,
                     '-vn','-ac','1','-ar','16000','_bc.wav','-y'], check=True)
+    # 0918：whisper 默认设置对口头禅是半聋的——同一段音频默认听出 0 个、加这句逐字提示词听出 4 个
+    # （商用转写器听出 10 个）。本 gate 的 clip_fillers 全片扫描此前就是这样漏掉 16 个 uh 的。
+    # 提示词是免费的部分补救；真相源仍以 G13 filler_gate（独立转写器）为准。
     r = mlx_whisper.transcribe('_bc.wav', path_or_hf_repo='mlx-community/whisper-large-v3-turbo',
-                               word_timestamps=True, language='en')
+                               word_timestamps=True, language='en',
+                               initial_prompt='Verbatim transcript including every filler and '
+                                              'hesitation: uh, um, er, you know, like.')
     return [dict(word=w['word'], start=w['start']+max(t0,0), end=w['end']+max(t0,0))
             for s in r['segments'] for w in s.get('words',[])]
 

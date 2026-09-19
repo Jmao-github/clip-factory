@@ -67,7 +67,8 @@ build/overlay/rt2/vision_review 均支持 `ONLY=<slug>`：只重建/重查单条
 | **绿框根除**：成片全程 2fps 扫绿框色签名 | `greenbox_scan.py`（新·0906） |
 | **成片视觉审查**：≤2.5s 间隔全程抽帧 → Gemini 毙稿官逐格严判 + **本人逐格亲眼裁决**（发布前最后一关，Gemini 误报要人裁，真事故修完重跑） | `vision_review.py`（新·0906，负责人拍板必过） |
 | layout/内容/说话人边界 | 见 WORKFLOW §4 |
-| **promote 发布门**：核全部 gate 证据+新鲜度（证据 mtime ≥ 候选片），全绿才 `cand→{slug}.mp4`；缺证/失败/过期指名 clip+gate 退出非零。**旧有效成片在 promote 前绝不被触碰** | `promote.py`（新·0913） |
+| **口头禅终检 G13**：独立于 whisper 的转写器复听成片，uh/um 必须为 0（whisper 对 filler 半聋，G2 是它比它自己，结构上查不出来） | `filler_gate.py`（新·0918） |
+| **promote 发布门**：核全部 gate 证据(含 G13)+新鲜度（证据 mtime ≥ 候选片），全绿才 `cand→{slug}.mp4`；缺证/失败/过期指名 clip+gate 退出非零。**旧有效成片在 promote 前绝不被触碰** | `promote.py`（新·0913） |
 
 ### 5. 交付
 成片（Title Case 命名）+ 决策表（每段时间码/原话/为什么）+ 排期文案草稿。**发布永远等负责人点头**。
@@ -89,6 +90,8 @@ build/overlay/rt2/vision_review 均支持 `ONLY=<slug>`：只重建/重查单条
 9. 字幕词映射用严格包含 → 被帧对齐削掉几十毫秒的整词从字幕消失（音频里还在）；专名表在单屏文本上 re.sub → 品牌名跨屏就整条失效。两条都已改（WORKFLOW §3.5c）
 10. 片头/段首挑 0.0x 秒的功能词或弱读 but/and/so → 声学起点落进词内，G11 必 FAIL；补时长加内容段，别往前借半句
 11. 成片里露出讲者的 Finder/聊天窗 → 可能带第三方真人姓名，发布前必须逐帧看清（WORKFLOW 末节）
+12. **删口头禅只能删转写器写下来的**：whisper 对 uh/um 半聋且不均匀（同段音频默认 0 / 逐字提示 4 / 商用转写器 10），`dropped=0` 不等于干净。真相源用 `faithful_transcript.py`，终检用 G13（WORKFLOW §4b）
+13. **一个工具不能验证它自己**：G2 拿 whisper 比 whisper，对 whisper 的盲区永远绿。任何"自己比自己"的 gate 都要配一个换厂的独立检查
 
 ## 真相源
 阈值/规则全文 = `references/WORKFLOW.md`（v3）；选段判据（留存法则/视觉节奏门槛/硬门槛）= `references/Clip Selection Rubric.md`；节奏实测基线 = `references/Pacing Baseline.md`；选段 prompt 模板 = `references/selection_prompt_template.txt`。

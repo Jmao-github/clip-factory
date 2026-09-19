@@ -4,7 +4,7 @@
 
 Turn a 60-minute talk recording into a handful of 45–58 second clips that are actually publishable — and refuse to ship the ones that aren't.
 
-This is not a "highlight finder". It is an opinionated editing pipeline with a **verification loop**: twelve machine checks plus a release gate stand between the renderer and the output folder. If a word got clipped in half, if a filler "uh" survived at a splice, if the loudness drifted, if a subtitle lost a word that is still in the audio — the pipeline says so, names the clip and the gate, and the clip does not get promoted.
+This is not a "highlight finder". It is an opinionated editing pipeline with a **verification loop**: thirteen machine checks plus a release gate stand between the renderer and the output folder. If a word got clipped in half, if a filler "uh" survived at a splice, if the loudness drifted, if a subtitle lost a word that is still in the audio — the pipeline says so, names the clip and the gate, and the clip does not get promoted.
 
 Every rule in here was written after something went wrong on real footage. The `references/` docs record what broke and why the rule exists.
 
@@ -23,7 +23,7 @@ source video + (optional) meeting notes
   ├─ 3  render                word-boundary cuts → smoothing layer (drop fillers, compress breaths)
   │                           → zero-upscale framing → lossless intermediates → subtitles → single crf16 pass
   │
-  ├─ 4  verification          12 gates (see below). Any FAIL names the clip + gate; you fix the content
+  ├─ 4  verification          13 gates (see below). Any FAIL names the clip + gate; you fix the content
   │                           and re-run only that clip with ONLY=<slug>.
   │
   └─ 5  promote               evidence + freshness check → {slug}.cand.mp4 becomes {slug}.mp4
@@ -40,7 +40,7 @@ A ~60 minute source takes roughly 50 minutes of machine time for 3–5 clips. A 
 - **Subtitles are held to the audio.** If a word is audible it appears in the caption; fillers never do; multi-word brand names are corrected on the word sequence so a line break can't defeat the glossary.
 - **Nothing ships on a stale check.** The promote gate compares every evidence file's mtime against the candidate render.
 
-## The twelve gates
+## The thirteen gates
 
 | # | Gate | What it proves | Evidence |
 |---|---|---|---|
@@ -56,6 +56,9 @@ A ~60 minute source takes roughly 50 minutes of machine time for 3–5 clips. A 
 | 10 | Loudness | −16 ±1 LUFS integrated, true peak ≤ −1.0 dBTP (EBU R128) | `loudness.json` |
 | 11 | Boundary words | At every junction: last word of the previous segment present, first word of the next present, no orphan filler within ±0.45s | `boundary_check.json` |
 | 12 | Splice reverb audit | Waveform check for filler tails and glued-on "uh" (transcription is deaf to this — it must be measured acoustically) | `splice_audit.json` |
+| 13 | Filler final check | The finished clip re-heard by a transcriber **from a different vendor**; zero surviving `uh`/`um` required | `filler_gate.json` |
+
+Gate 13 exists because gate 2 cannot catch what it is made of: it compares one transcript against a re-transcription from the same model, so a word that model never writes down passes by construction. Five clips once cleared all twelve gates while two of them still carried ten and six audible filler words. A tool cannot verify itself — see [references/vendor-api-evaluation.md](references/vendor-api-evaluation.md).
 
 Gate 9 is deliberately not fully automatic. The model reviewer over-reports; a person rules on each grid before anything is promoted.
 
@@ -65,7 +68,8 @@ Gate 9 is deliberately not fully automatic. The model reviewer over-reports; a p
 - `ffmpeg` / `ffprobe` on PATH
 - `pip install -r requirements.txt` (`mlx-whisper` is Apple-Silicon only; on other hardware swap in `openai-whisper` or `faster-whisper` and keep `word_timestamps=True`)
 - A Gemini API key for the content-scoring and visual-review steps (`GEMINI_API_KEY`)
-- Optional: `OPENAI_API_KEY` for the second scoring pool, `OPUSCLIP_API_KEY` for third-opinion highlight finding, `DESCRIPT_API_KEY` for the dubbing chain
+- `OPUSCLIP_API_KEY` **or** `DESCRIPT_API_KEY` for gate 13 and for the faithful-transcript source (see `references/vendor-api-evaluation.md` for why a second vendor is not optional here)
+- Optional: `OPENAI_API_KEY` for the second scoring pool
 
 Keys are read from the process environment first, then from `$CLIP_FACTORY_ENV`, `./.env`, or `~/.clip-factory.env`. Copy `.env.example` to `.env` to get started. **`.env` is gitignored — never commit a key.**
 
@@ -119,6 +123,7 @@ SKILL.md                              agent-facing operating instructions
 references/WORKFLOW.md                the source of truth for every threshold and rule
 references/Clip Selection Rubric.md   what makes a segment worth clipping
 references/Pacing Baseline.md         measured pacing baselines, including two failed experiments
+references/vendor-api-evaluation.md    every Descript and OpusClip endpoint, called for real
 references/selection_prompt_template.txt
 scripts/                              the pipeline (build, overlay, gates, promote)
 examples/                             example spec.json and glossary.json
